@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import tweetsRouter from './router/tweets.js';
 
+
 const app = express();
 app.use(express.json());
 app.use(morgan('dev'));
@@ -12,4 +13,6 @@ app.use((req, res, next)=>{
   res.sendStatus(404);
 })
 
-app.listen(8080);
+app.listen(8080,()=>{
+  console.log('listen http://localhost:8080/tweets')
+});
