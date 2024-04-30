@@ -1,29 +1,29 @@
 import * as bcrypt from 'bcrypt';
 
-let Users = [
+let UserList = [
   {
-    id:'1',
-    username:'apple',
-    password:'$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi',
-    name:'김사과',
-    email:'apple@apple.com',
-    url: 'URL'
+    id:"1",
+    username:"apple",
+    password:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
+    name:"김사과",
+    email:"apple@apple.com",
+    url:""
   },
   {
-    id:'2',
-    username:'banana',
-    password:'2222',
-    name:'반하나',
-    email:'banana@banana.com',
-    url: 'URL'
+    id:"2",
+    username:"banana",
+    password:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
+    name:"반하나",
+    email:"banana@banana.com",
+    url:""
   },
   {
-    id:'3',
-    username:'orange',
-    password:'3333',
-    name:'오랜지',
-    email:'orange@orange.com',
-    url: 'URL'
+    id:"3",
+    username:"orange",
+    password:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
+    name:"오랜지",
+    email:"orange@orange.com",
+    url:""
   }
 ]
 
@@ -32,7 +32,7 @@ let Users = [
  * @returns 
  */
 export async function getAll(){
-  return Users;
+  return UserList;
 }
 
 /**
@@ -41,7 +41,9 @@ export async function getAll(){
  * @returns 
  */
 export async function getByUsername(username){
-  return Users.find((user)=>user.username == username)
+  // return tweets.find((tweet)=>tweet.id == id)
+  const result = UserList.find((user)=>user.username == username)
+  return result;
 }
 
 /**
@@ -55,14 +57,14 @@ export async function getByUsername(username){
 export async function create(username, password, name, email){
   try{
     const user = {
-      id:Users.length+1,
+      id:UserList.length+1,
       username,
       password,
       name,
       email,
       url:""
     }
-    Users = {...Users,user}
+    UserList = [...UserList,user]
     return true
   }catch(err){
     console.log(`회원가입중 에러발생! ${err}`)
@@ -76,7 +78,7 @@ export async function create(username, password, name, email){
  * @returns 
  */
 export async function login(username, password){
-  const user = Users.find((user)=>user.username = username);
+  const user = UserList.find((user)=>user.username == username);
   const result = bcrypt.compareSync(password, user.password);
   return result
 }
@@ -91,7 +93,7 @@ export async function login(username, password){
  */
 export async function edit(username, password, name, email){
   try{
-    const user = Users.find((user)=>user.username == username)
+    const user = UserList.find((user)=>user.username == username)
     if(user){
       user.password = password;
       user.name = name;
@@ -110,7 +112,7 @@ export async function edit(username, password, name, email){
  * @param {string} password 
  */
 export async function remove(username, password){
-  const user = Users.find((user)=>user.username == username)
+  const user = UserList.find((user)=>user.username == username)
   if( user.password === password ){
 
   } 

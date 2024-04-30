@@ -43,7 +43,7 @@ export async function create(text, name, username){
       username,
       url:''
     }
-    tweets = {...tweets,tweet};
+    tweets = [...tweets,tweet];
     return tweets
   }catch(err){
     console.log(`트윗 작성 에러 발생 ${err}`)

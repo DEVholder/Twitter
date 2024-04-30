@@ -24,7 +24,7 @@ router.get('/', authController.getAllUser)
 
 // username에 해당하는 사용자 정보 출력
 // http://localhost:8080/auth?username=
-router.get('/', authController.getUser)
+router.get('/:username', authController.getUser)
 
 // 회원가입
 // http://localhost:8080/auth/signup
@@ -41,5 +41,7 @@ router.put('/', validateSignUp, authController.editUser)
 // 회원탈퇴
 // http://localhost:8080/auth
 router.delete('/', authController.DeleteUser)
+
+router.get('/me', authController.verify)
 
 export default router
