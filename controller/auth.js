@@ -20,11 +20,14 @@ export async function getUser(req, res, next){
  * 회원가입 
  */
 export async function SignUp(req, res, next){
-  const { username, passwd, name, email} = req.body;
-  const auth = await authRepository.create(username, passwd, name, email);
+  const { username, password, name, email} = req.body;
+  const auth = await authRepository.create(username, password, name, email);
   if(auth){
+    console.log(auth)
     const user = await authRepository.getByUsername(username)
-    res.status(201).json(user);
+    console.log(user)
+    // res.status(201).json(user);
+    res.status(201).json({message:"회원가입 완료!"})
   }else res.status(502).json({message:"회원가입 에러 발생!"})
 
 }
@@ -33,8 +36,8 @@ export async function SignUp(req, res, next){
  * 로그인
  */
 export async function login(req, res, next){
-  const {username, passwd} = req.body;
-  const user = await authRepository.login(username);
+  const {username, password} = req.body;
+  const user = await authRepository.login(username, password);
   if(user){
     res.status(201).json(`${username} 로그인 성공`)
   }else{
@@ -47,7 +50,7 @@ export async function login(req, res, next){
  */
 export async function editUser(req, res, next){
   const userid = req.param.userid
-  const { username, passwd, name, email} = req.body;
+  const { username, password, name, email} = req.body;
 }
 /**
  * 회원탈퇴

@@ -1,8 +1,10 @@
-let users = [
+import * as bcrypt from 'bcrypt';
+
+let Users = [
   {
     id:'1',
     username:'apple',
-    password:'1111',
+    password:'$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi',
     name:'김사과',
     email:'apple@apple.com',
     url: 'URL'
@@ -22,7 +24,7 @@ let users = [
     name:'오랜지',
     email:'orange@orange.com',
     url: 'URL'
-  },
+  }
 ]
 
 /**
@@ -30,7 +32,7 @@ let users = [
  * @returns 
  */
 export async function getAll(){
-  return users;
+  return Users;
 }
 
 /**
@@ -39,28 +41,28 @@ export async function getAll(){
  * @returns 
  */
 export async function getByUsername(username){
-  return  users.find((user)=>user.username == username)
+  return Users.find((user)=>user.username == username)
 }
 
 /**
  * 회원가입
  * @param {string} username 
- * @param {string} passwd 
+ * @param {string} password 
  * @param {string} name 
  * @param {string} email 
  * @returns 
  */
-export async function create(username, passwd, name, email){
+export async function create(username, password, name, email){
   try{
     const user = {
-      id:users.length+1,
+      id:Users.length+1,
       username,
-      passwd,
+      password,
       name,
       email,
       url:""
     }
-    users = {...users,user}
+    Users = {...Users,user}
     return true
   }catch(err){
     console.log(`회원가입중 에러발생! ${err}`)
@@ -73,24 +75,25 @@ export async function create(username, passwd, name, email){
  * @param {string} username 
  * @returns 
  */
-export async function login(username){
-  const user = users.find((user)=>user.username = username);
-  return user;
+export async function login(username, password){
+  const user = Users.find((user)=>user.username = username);
+  const result = bcrypt.compareSync(password, user.password);
+  return result
 }
 
 /**
  * 회원정보 수정
  * @param {string} username 
- * @param {string} passwd 
+ * @param {string} password 
  * @param {string} name 
  * @param {string} email 
  * @returns 
  */
-export async function edit(username, passwd, name, email){
+export async function edit(username, password, name, email){
   try{
-    const user = users.find((user)=>user.username == username)
+    const user = Users.find((user)=>user.username == username)
     if(user){
-      user.passwd = passwd;
+      user.password = password;
       user.name = name;
       user.email = email;
       return true;
@@ -104,11 +107,11 @@ export async function edit(username, passwd, name, email){
 /**
  * 회원탈퇴
  * @param {string} username 
- * @param {string} passwd 
+ * @param {string} password 
  */
-export async function remove(username, passwd){
-  const user = users.find((user)=>user.username == username)
-  if( user.password === passwd ){
+export async function remove(username, password){
+  const user = Users.find((user)=>user.username == username)
+  if( user.password === password ){
 
   } 
 }
