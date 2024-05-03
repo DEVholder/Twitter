@@ -1,11 +1,12 @@
 import * as authRepository from "../data/auth.js";
 import * as bcrypt from 'bcrypt';
+import { config } from "../config.js";
 
 import jwt from 'jsonwebtoken'
 
-const secretkey = 'abcde1234'
-const jwtExpiresInDays = '2d'
-const bcryptSaltRounds = 10
+const secretkey = config.jwt.secretKey
+const jwtExpiresInDays = config.jwt.expiresInSec
+const bcryptSaltRounds = config.bcrypt.saltRounds
 
 
 // async function makeToken(id){
