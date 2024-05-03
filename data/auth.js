@@ -4,7 +4,7 @@ let UserList = [
   {
     id:"1",
     username:"apple",
-    password:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
+    hashed:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
     name:"김사과",
     email:"apple@apple.com",
     url:""
@@ -12,7 +12,7 @@ let UserList = [
   {
     id:"2",
     username:"banana",
-    password:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
+    hashed:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
     name:"반하나",
     email:"banana@banana.com",
     url:""
@@ -20,7 +20,7 @@ let UserList = [
   {
     id:"3",
     username:"orange",
-    password:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
+    hashed:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
     name:"오랜지",
     email:"orange@orange.com",
     url:""
@@ -41,9 +41,14 @@ export async function getAll(){
  * @returns 
  */
 export async function getByUsername(username){
-  // return tweets.find((tweet)=>tweet.id == id)
-  const result = UserList.find((user)=>user.username == username)
-  return result;
+  return UserList.find((user)=>user.username == username)
+}
+
+/**
+ * id 중복검사
+ */
+export async function getById(id){
+  return UserList.find((user)=>user.id == id)
 }
 
 /**
@@ -52,20 +57,14 @@ export async function getByUsername(username){
  * @param {string} password 
  * @param {string} name 
  * @param {string} email 
+ * @param {string} url 
  * @returns 
  */
-export async function create(username, password, name, email){
+export async function create(user){
   try{
-    const user = {
-      id:UserList.length+1,
-      username,
-      password,
-      name,
-      email,
-      url:""
-    }
-    UserList = [...UserList,user]
-    return true
+    const created = {id:(UserList.length+1).toString(),...user}
+    UserList.push(created)
+    return created.username
   }catch(err){
     console.log(`회원가입중 에러발생! ${err}`)
     return false;
@@ -77,11 +76,11 @@ export async function create(username, password, name, email){
  * @param {string} username 
  * @returns 
  */
-export async function login(username, password){
-  const user = UserList.find((user)=>user.username == username);
-  const result = bcrypt.compareSync(password, user.password);
-  return result
-}
+// export async function login(username, password){
+//   const user = UserList.find((user)=>user.username == username);
+//   const result = bcrypt.compareSync(password, user.password);
+//   return result
+// }
 
 /**
  * 회원정보 수정

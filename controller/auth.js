@@ -3,16 +3,23 @@ import * as bcrypt from 'bcrypt';
 
 import jwt from 'jsonwebtoken'
 
-const secret = 'abcde1234'
+const secretkey = 'abcde1234'
+const jwtExpiresInDays = '2d'
+const bcryptSaltRounds = 10
 
-async function makeToken(id){
-  const token = jwt.sign(
-    {
-      id:id,
-      isAdmin:false
-    }, secret, {expiresIn: '1h'}
-  )
-  return token
+
+// async function makeToken(id){
+//   const token = jwt.sign(
+//     {
+//       id:id,
+//       isAdmin:false
+//     }, secret, {expiresIn: '1h'}
+//   )
+//   return token
+// }
+
+function createjwtToken(id){
+  return jwt.sign(({id}), secretkey, {expiresIn:jwtExpiresInDays})
 }
 
 /** 
@@ -35,17 +42,24 @@ export async function getUser(req, res, next){
 
 /**
  * 회원가입 
+ * 아이디 중복 체크
  */
 export async function SignUp(req, res, next){
-  const { username, password, name, email} = req.body;
-  const hashed = bcrypt.hashSync(password, 10);
-  const auth = await authRepository.create(username, hashed, name, email);
-  if(auth){
-    const user = await authRepository.getByUsername(req.body.username)
-    res.status(201).json(user);
-    // res.status(201).json({message:"회원가입 완료!"})
-  }else res.status(502).json({message:"회원가입 에러 발생!"})
-
+  const { username, password, name, email, url} = req.body;
+  const isDuplicate = await authRepository.getByUsername(username)
+  if(isDuplicate){
+    res.status(409).json({message:"이미 있는 아이디입니다."})
+  }else{
+    const hashed = bcrypt.hashSync(password, bcryptSaltRounds);
+    const userid = await authRepository.create({username, hashed, name, email, url});
+    if(!userid){
+      res.status(502).json({message:"회원가입 에러 발생!"})
+    }else{
+      const user = await authRepository.getByUsername(req.body.username)
+      const token = createjwtToken(user)
+      res.status(201).json({user:user,token:token});
+    }
+  }
 }
 
 /**
@@ -53,18 +67,38 @@ export async function SignUp(req, res, next){
  */
 export async function login(req, res, next){
   const {username, password} = req.body;
-  const user = await authRepository.login(username, password);
-  if(user){
-    res.status(201).header('token',makeToken(username)).json()
+  // const user = await authRepository.login(username, password);
+  const user = await authRepository.getByUsername(username);
+  if(!user){
+    return res.status(401).json({message:"아이디를 찾을수 없음"})
   }else{
-    res.status(404).json({message:`${username} 아이디 또는 비밀번호를 확인하세요!`})
+    const isValidpassword = bcrypt.compareSync(password, user.hashed);
+    console.log(isValidpassword)
+    if(!isValidpassword){
+      return res.status(401).json({message:`${username} 아이디 또는 비밀번호를 확인하세요!`})
+    }else{
+      const token = createjwtToken(user.username)
+      res.status(201).header('token',token).json({user,token})
+    }
   }
 }
 
-export async function verify(req, res, next){
-  const token = req.header('token');
-  if(token){
-    res.status(200).json(token)
+// export async function verify(req, res, next){
+//   const token = req.header('token');
+//   if(token){
+//     res.status(200).json(token)
+//   }
+// }
+
+export async function me(req,res,next){
+  const username = req.body.username
+  console.log(username)
+  const user = await authRepository.getByUsername(username)
+  console.log(user)
+  if(!user){
+    return res.status(404).json({message:"일치하는 사용작가 없음"})
+  }else{
+    res.status(200).json({token:req.token, username:user.username})
   }
 }
 
