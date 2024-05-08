@@ -1,31 +1,4 @@
-import * as bcrypt from 'bcrypt';
-
-let UserList = [
-  {
-    id:"1",
-    username:"apple",
-    hashed:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
-    name:"김사과",
-    email:"apple@apple.com",
-    url:""
-  },
-  {
-    id:"2",
-    username:"banana",
-    hashed:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
-    name:"반하나",
-    email:"banana@banana.com",
-    url:""
-  },
-  {
-    id:"3",
-    username:"orange",
-    hashed:"$2b$10$oTwQKzSRDS4dCk6iPFhibeOJaSzzpyto.wbDu.UvfwBK0tm3Ndioi",
-    name:"오랜지",
-    email:"orange@orange.com",
-    url:""
-  }
-]
+import { db } from '../db/database.js';
 
 /**
  * 모든 사용자 리스트를 출력
@@ -41,14 +14,20 @@ export async function getAll(){
  * @returns 
  */
 export async function getByUsername(username){
-  return UserList.find((user)=>user.username == username)
+  return db.execute('select * from users where username = ?', [username])
+            .then((result)=>{
+              // console.log(`아이디 중복 체크 ${result[0]}`);
+              return result[0][0];
+            })
 }
 
 /**
  * id 중복검사
  */
 export async function getById(id){
-  return UserList.find((user)=>user.id == id)
+  console.log('getbyid')
+  return db.execute('select * from users where id = ?', [id])
+            .then((result)=>result[0][0])
 }
 
 /**
@@ -61,14 +40,14 @@ export async function getById(id){
  * @returns 
  */
 export async function create(user){
-  try{
-    const created = {id:(UserList.length+1).toString(),...user}
-    UserList.push(created)
-    return created.username
-  }catch(err){
-    console.log(`회원가입중 에러발생! ${err}`)
-    return false;
-  }
+  console.log('회원가입 호출')
+  const {username, hashed, name, email, url} = user;
+  return db.execute('insert into users (username, password, name, email, url) values (?,?,?,?,?)',[username, hashed, name, email, url])
+            .then((result)=>{
+              // console.log(`회원가입 ${result[0]}`);
+              return result[0];
+            })
+           
 }
 
 /**

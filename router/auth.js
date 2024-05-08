@@ -18,14 +18,6 @@ const validateSignUp = [
   validate
 ]
 
-// 모든 사용자 리스트를 출력
-// http://localhost:8080/auth
-// router.get('/', authController.getAllUser)
-
-// username에 해당하는 사용자 정보 출력
-// http://localhost:8080/auth?username=
-// router.get('/:username', authController.getUser)
-
 // 회원가입
 // http://localhost:8080/auth/signup
 router.post('/signup', validateSignUp, authController.SignUp)
@@ -33,14 +25,6 @@ router.post('/signup', validateSignUp, authController.SignUp)
 // 로그인
 // http://localhost:8080/auth/login
 router.post('/login', validateSignin, authController.login)
-
-// // 회원정보 수정
-// // http://localhost:8080/auth
-// router.put('/', validateSignUp, authController.editUser)
-
-// // 회원탈퇴
-// // http://localhost:8080/auth
-// router.delete('/', authController.DeleteUser)
 
 // 로그인 상태 확인
 router.get('/me', isAuth, authController.me)

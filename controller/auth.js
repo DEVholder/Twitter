@@ -53,11 +53,13 @@ export async function SignUp(req, res, next){
   }else{
     const hashed = bcrypt.hashSync(password, bcryptSaltRounds);
     const userid = await authRepository.create({username, hashed, name, email, url});
+    console.log(userid)
     if(!userid){
       res.status(502).json({message:"회원가입 에러 발생!"})
     }else{
       const user = await authRepository.getByUsername(req.body.username)
-      const token = createjwtToken(user)
+      console.log(user.userid)
+      const token = createjwtToken(user.id)
       res.status(201).json({user:user,token:token});
     }
   }
@@ -70,15 +72,18 @@ export async function login(req, res, next){
   const {username, password} = req.body;
   // const user = await authRepository.login(username, password);
   const user = await authRepository.getByUsername(username);
+  console.log(user)
   if(!user){
     return res.status(401).json({message:"아이디를 찾을수 없음"})
   }else{
-    const isValidpassword = bcrypt.compareSync(password, user.hashed);
+    // console.log(user[0][0].password)
+    const isValidpassword = bcrypt.compareSync(password, user.password);
     console.log(isValidpassword)
     if(!isValidpassword){
       return res.status(401).json({message:`${username} 아이디 또는 비밀번호를 확인하세요!`})
-    }else{
-      const token = createjwtToken(user.username)
+    }else{  
+      console.log(user.id)
+      const token = createjwtToken(user.id)
       res.status(201).header('token',token).json({user,token})
     }
   }
@@ -92,9 +97,8 @@ export async function login(req, res, next){
 // }
 
 export async function me(req,res,next){
-  const username = req.body.username
-  console.log(username)
-  const user = await authRepository.getByUsername(username)
+  const id = req.body.id
+  const user = await authRepository.getById(id)
   console.log(user)
   if(!user){
     return res.status(404).json({message:"일치하는 사용작가 없음"})

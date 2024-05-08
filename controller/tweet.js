@@ -7,7 +7,7 @@ import * as tweetRepository from "../data/tweet.js";
 //   res.status(200).json(data);
 export async function getTweets(req, res){
   const username = req.query.username;
-  const data = await(username ? tweetRepository.getAllByusername(username) 
+  const data = await (username ? tweetRepository.getAllByusername(username) 
                               : tweetRepository.getAll());
   res.status(200).json(data);
 }
@@ -40,8 +40,8 @@ export async function getTweet(req, res, next){
 //   tweets = {tweet,...tweets};
 //   res.status(201).json(tweets);
 export async function createTweet(req, res, next){
-  const {text, name, username} = req.body
-  const tweet = await tweetRepository.create(text, name, username)
+  const {text} = req.body
+  const tweet = await tweetRepository.create(text, req.body.id)
   if(tweet) res.status(201).json(tweet);
   else res.status(502).json({message:"오류발생",text:text,name:name,username:username});
 }
