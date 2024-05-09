@@ -1,79 +1,114 @@
-import {db} from '../db/database.js';
-import * as authRepository from "../data/auth.js";
+import SQ from 'sequelize';
+import { sequelize } from '../db/database.js';
+import { User } from './auth.js';
 
-const SELECT_JOIN = 'select tw.id, tw.text, tw.createdAt, tw.userid, us.username, us.name, us.email, us.url from tweets as tw join users us on tw.userid = us.id'
-const ORDER_DESC ='order by tw.createdAt desc'
+// const SELECT_JOIN = 'select tw.id, tw.text, tw.createdAt, tw.userid, us.username, us.name, us.email, us.url from tweets as tw join users us on tw.userid = us.id'
+// const ORDER_DESC ='order by tw.createdAt desc'
+
+const DataTypes = SQ.DataTypes;
+const Sequelize = sequelize;
+const INCLUDE_USER = {
+  attributes:[
+    'id',
+    'text',
+    'createdAt',
+    'userId',
+    [Sequelize.col('User.name'), 'name'],
+    [Sequelize.col('User.username'), 'username'],
+    [Sequelize.col('User.url'), 'url']
+  ], 
+  include:{
+    model: User,
+    attributes: [],
+  }
+}
+const ORDER_DESC = {
+  order:[['createdAt', 'DESC']]
+}
+
+const Tweet = sequelize.define('tweet',{
+  id:{
+    type:DataTypes.INTEGER,
+    autoIncrement: true,
+    allowNull: false,
+    primaryKey: true
+  },
+  text:{
+    type:DataTypes.STRING(2000),
+    allowNull: false,
+  }
+}, { timestamps: false})
+Tweet.belongsTo(User);
+
+// export const Tweet = sequelize.define(
+//   'tweet',
+//   {
+//     id:{
+//       type:DataTypes.INTEGER,
+//       autoIncrement: true,
+//       allowNull: false,
+//       primaryKey: true
+//     },
+//     userid:{
+//       type:DataTypes.INTEGER,
+//       references:{
+//         model:'user',
+//         key:'id',
+//       },
+//       allowNull: false
+//     },
+//     text:{
+//       type:DataTypes.STRING(2000)
+//     }
+//   },
+//   { timestamps: false}
+// )
+
+// Tweet.belongsTo(User,{
+//   foreignKey: 'userid'
+// })
 
 // 모든 트윗을 리턴
 export async function getAll(){
-  // return tweets;
-  return db.execute(`${SELECT_JOIN} ${ORDER_DESC}`)
-                    .then((result)=>{
-                      // console.log(result)
-                      return result[0]
-                    })
+  return Tweet.findAll({...INCLUDE_USER,...ORDER_DESC});
 };
 
 // 아이디로 해당 아이디에 대한 트윗을 리턴
 export async function getAllByusername(username){
-  // return tweets.filter((tweet) => tweet.username == username)
-  return db.execute(`${SELECT_JOIN} where username = ? ${ORDER_DESC}`, [username])
-                  .then((result)=>{
-                    return result[0]
-                  })
+  // return Tweet.findOne({include:[{model:User,where:{username}}]})
+  return Tweet.findAll({...INCLUDE_USER, ...ORDER_DESC, include:{
+    ...INCLUDE_USER.include, where:{username}
+  }})
 }
-
-
 
 // 글 번호에 대한 트윗을 리턴
 export async function getById(id){
-  // return tweets.find((tweet)=>tweet.id == id)
-  return db.execute(`${SELECT_JOIN} where tw.id = ? ${ORDER_DESC}`, [id])
-            .then((result)=>{
-              // console.log(result)
-              return result[0]
-            })
+  return Tweet.findOne({where:{id}, ...INCLUDE_USER});
 }
 
 // 트윗을 작성
-export async function create(text, userid){
-  return db.execute(`insert into tweets (text, userid) values (?, ?)`, [text, userid])
-            .then((result)=>{
-              // console.log(result);
-              return getById(result[0].insertId)
-            })
+export async function create(text, userId){
+//   return db.execute(`insert into tweets (text, userid) values (?, ?)`, [text, userid])
+//             .then((result)=>{
+//               // console.log(result);
+//               return getById(result[0].insertId)
+//             })
+  // return Tweet.create({userid, text}).then((data)=>getById(data.dataValues.id))
+  console.log(userId)
+  return Tweet.create({text, userId}).then((data)=>this.getById(data.dataValues.id));
 }
 
 // 트윗을 변경
 export async function update(id, text){
-  // try{
-  //   const tweet = tweets.find((tweet)=>tweet.id == id);
-  //   if(tweet){
-  //     tweet.text = text;
-  //     return tweet;
-  //   }
-  //   else return false;
-  // }catch(err){
-  //   console.log(`트윗 변경 에러 발생 ${err}`)
-  //   return false;
-  // }
-  return db.execute(`update tweets set text= ? where id= ?`, [text, id])
-            .then((result)=>{
-              console.log(result)
-              return getById(id);
-            })
+  return Tweet.findByPk(id, INCLUDE_USER).then((tweet)=>{
+    tweet.text = text;
+    return tweet.save();
+  })
 }
 
 // 트윗을 삭제
 export async function remove(id){
-  // const tweetslen = tweets.length;
-  // tweets = tweets.filter((tweet)=>tweet.id != id);
-  // if(tweets.length != tweetslen) return true;
-  // else return false;
-  return db.execute('delete from tweets where id = ?', [id])
-            .then((result)=>{
-              if(result[0].affectedRows == 1)
-                console.log(result[0].affectedRows)
-                return true
-            });
+  return Tweet.findByPk(id).then((tweet)=>{
+    tweet.destroy();
+  })
 }

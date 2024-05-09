@@ -46,13 +46,13 @@ export async function getUser(req, res, next){
  * 아이디 중복 체크
  */
 export async function SignUp(req, res, next){
-  const { username, password, name, email, url} = req.body;
+  let { username, password, name, email, url} = req.body;
   const isDuplicate = await authRepository.getByUsername(username)
   if(isDuplicate){
     res.status(409).json({message:"이미 있는 아이디입니다."})
   }else{
-    const hashed = bcrypt.hashSync(password, bcryptSaltRounds);
-    const userid = await authRepository.create({username, hashed, name, email, url});
+    password = bcrypt.hashSync(password, bcryptSaltRounds);
+    const userid = await authRepository.create({username, password, name, email, url});
     console.log(userid)
     if(!userid){
       res.status(502).json({message:"회원가입 에러 발생!"})

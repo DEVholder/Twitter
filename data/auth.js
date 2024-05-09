@@ -1,4 +1,36 @@
-import { db } from '../db/database.js';
+import SQ from 'sequelize';
+import { sequelize } from '../db/database.js';
+const DataTypes = SQ.DataTypes;
+
+export const User = sequelize.define(
+  'user',
+  {
+    id:{
+      type:DataTypes.INTEGER,
+      autoIncrement: true,
+      allowNull: false,
+      primaryKey: true
+    },
+    username:{
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    password:{
+      type: DataTypes.STRING(150),
+      allowNull: false
+    },
+    name:{
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    email:{
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    url: DataTypes.STRING(1000)
+  },
+  { timestamps: false}
+)
 
 /**
  * 모든 사용자 리스트를 출력
@@ -14,20 +46,14 @@ export async function getAll(){
  * @returns 
  */
 export async function getByUsername(username){
-  return db.execute('select * from users where username = ?', [username])
-            .then((result)=>{
-              // console.log(`아이디 중복 체크 ${result[0]}`);
-              return result[0][0];
-            })
+  return User.findOne({where:{username}})
 }
 
 /**
  * id 중복검사
  */
 export async function getById(id){
-  console.log('getbyid')
-  return db.execute('select * from users where id = ?', [id])
-            .then((result)=>result[0][0])
+  return User.findByPk(id);
 }
 
 /**
@@ -40,14 +66,7 @@ export async function getById(id){
  * @returns 
  */
 export async function create(user){
-  console.log('회원가입 호출')
-  const {username, hashed, name, email, url} = user;
-  return db.execute('insert into users (username, password, name, email, url) values (?,?,?,?,?)',[username, hashed, name, email, url])
-            .then((result)=>{
-              // console.log(`회원가입 ${result[0]}`);
-              return result[0];
-            })
-           
+  return User.create(user).then((data)=>data.dataValues.id);
 }
 
 /**

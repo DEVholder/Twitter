@@ -22,6 +22,7 @@ export const isAuth = async(req, res, next)=>{
         // console.log(decoded.id)
         const user = await authRepository.getById(decoded.id);
         if(!user){
+          console.log(user)
           console.log('에러3')
           return res.status(401).json(AUTH_ERROR);
         }

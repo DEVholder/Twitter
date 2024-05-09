@@ -25,7 +25,7 @@ export async function getTweet(req, res, next){
   const tweet = await tweetRepository.getById(id);
   if(tweet) res.status(200).json(tweet)
   else res.status(404).json({message:`${id}에 해당하는 트윗이 없습니다`});
-}
+} 
 
 // 트윗을 생성하는 함수
 // const {text, name, username} = req.body
