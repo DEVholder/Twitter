@@ -1,15 +1,17 @@
-import MongoDB from 'mongodb';
-import { getUsers } from '../db/database.js';
+import mongoose from "mongoose";
+import { useVirtualId } from "../db/database.js";
 
-const ObjectID = MongoDB.ObjectId;
+const userSchema = new mongoose.Schema({
+  username: {type:String, require:true},
+  name: {type:String, require:true},
+  email: {type:String, require:true},
+  password: {type:String, require: true},
+  url: String
+})
 
-// /**
-//  * 모든 사용자 리스트를 출력
-//  * @returns 
-//  */
-// export async function getAll(){
-//   return UserList;
-// }
+useVirtualId(userSchema);
+
+const User = mongoose.model('user', userSchema);
 
 // /**
 //  * username에 해당하는 사용자 정보 출력
@@ -17,14 +19,14 @@ const ObjectID = MongoDB.ObjectId;
 //  * @returns 
 //  */
 export async function getByUsername(username){
-  return getUsers().find({username}).next().then(MapOptionalUser);
+  return User.findOne({username})
 }
 
 // /**
 //  * id 중복검사
 //  */
 export async function getById(id){
-  return getUsers().find({_id: new ObjectID(id)}).next().then(MapOptionalUser)
+  return User.findById(id);
 }
 
 // /**
@@ -37,9 +39,7 @@ export async function getById(id){
 //  * @returns 
 //  */
 export async function create(user){
-  return getUsers().insertOne(user).then((result)=>{console.log(result.insertedId.toString());
-    return result
-  })
+  return new User(user).save().then((data)=> data.id);
 }
 
 // /**
@@ -87,7 +87,3 @@ export async function create(user){
 
 //   } 
 // }
-
-function MapOptionalUser(user){
-  return user ? {...user, id: user._id.toString()} : user;
-}

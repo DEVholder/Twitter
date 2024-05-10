@@ -17,6 +17,7 @@ app.use((req, res, next)=>{
 })
 
 connectDB().then((db)=>{
+  console.log('Mongoose MongoDB')
   app.listen(config.host.port, ()=>{
     console.log(`listen http://localhost:${config.host.port}`)
   });
